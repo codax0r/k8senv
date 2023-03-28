@@ -1,0 +1,54 @@
+Vagrant.configure("2") do |config|
+    config.vm.box = "ubuntu/jammy64"
+    config.vm.define "k8sm1" do | w |
+    w.vm.hostname = "k8sm1"
+    w.vm.network "private_network", ip: "192.168.56.13"
+    w.vm.provider "virtualbox" do |vb|
+      vb.memory = "3072"
+      vb.cpus = 2
+      vb.name = "k8sm1"
+    end
+    w.vm.provision "setup-hosts", :type => "shell", :path => "k8s-prep.sh" do |s|
+    end
+    w.vm.provision "shell", inline: <<-SHELL
+      apt-get update
+      apt-get install -y git wget vim curl
+     SHELL
+    end
+  
+    config.vm.box = "ubuntu/jammy64"
+    config.vm.define "k8sw1" do | w |
+        w.vm.hostname = "k8sw1"
+        w.vm.network "private_network", ip: "192.168.56.14"
+  
+        w.vm.provider "virtualbox" do |vb|
+          vb.memory = "1024"
+          vb.cpus = 1
+          vb.name = "k8sw1"
+        end
+        w.vm.provision "setup-hosts", :type => "shell", :path => "k8s-prep.sh" do |s|
+      end
+     w.vm.provision "shell", inline: <<-SHELL
+       apt-get update
+       apt-get install -y git wget vim curl
+     SHELL
+    end 
+
+    config.vm.box = "ubuntu/jammy64"
+    config.vm.define "k8sw2" do | w |
+        w.vm.hostname = "k8sw2"
+        w.vm.network "private_network", ip: "192.168.56.15"
+  
+        w.vm.provider "virtualbox" do |vb|
+          vb.memory = "1024"
+          vb.cpus = 1
+          vb.name = "k8sw2"
+        end
+          w.vm.provision "setup-hosts", :type => "shell", :path => "k8s-prep.sh" do |s|
+    end
+     w.vm.provision "shell", inline: <<-SHELL
+       apt-get update
+       apt-get install -y git wget vim curl
+     SHELL
+    end  
+  end
