@@ -22,8 +22,8 @@ Vagrant.configure("2") do |config|
         w.vm.network "private_network", ip: "192.168.56.14"
   
         w.vm.provider "virtualbox" do |vb|
-          vb.memory = "1024"
-          vb.cpus = 1
+          vb.memory = "2048"
+          vb.cpus = 2
           vb.name = "k8sw1"
         end
         w.vm.provision "setup-hosts", :type => "shell", :path => "k8s-prep.sh" do |s|
@@ -40,8 +40,8 @@ Vagrant.configure("2") do |config|
         w.vm.network "private_network", ip: "192.168.56.15"
   
         w.vm.provider "virtualbox" do |vb|
-          vb.memory = "1024"
-          vb.cpus = 1
+          vb.memory = "2048"
+          vb.cpus = 2
           vb.name = "k8sw2"
         end
           w.vm.provision "setup-hosts", :type => "shell", :path => "k8s-prep.sh" do |s|

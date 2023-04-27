@@ -24,6 +24,9 @@ apt-get install containerd -y
 
 mkdir -p /etc/containerd
 containerd config default > /etc/containerd/config.toml
+sed -i s/SystemdCgroup\ \=\ false/SystemdCgroup\ \=\ true/g /etc/containerd/config.toml
+
+systemctl restart containerd
 
 #install kubectl
 apt-get update &&  apt-get install -y apt-transport-https gnupg2 curl
@@ -36,6 +39,11 @@ echo 'source <(kubectl completion bash)' >>~/.bashrc
 #source /usr/share/bash-completion/bash_completion
 kubectl completion bash >/etc/bash_completion.d/kubectl
 
+#load a couple of necessary modules 
+sudo modprobe overlay
+sudo modprobe br_netfilter
+
+
 # Set iptables bridging
 cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
 net.bridge.bridge-nf-call-ip6tables = 1
@@ -46,17 +54,20 @@ sudo echo '1' > /proc/sys/net/ipv4/ip_forward
 sudo sysctl --system
 sudo sysctl -p -f /etc/sysctl.d/k8s.conf
 
-#load a couple of necessary modules 
-sudo modprobe overlay
-sudo modprobe br_netfilter
-
-cat << EOF | sudo tee /etc/modprobe.d/k8s.conf
+cat << EOF | sudo tee /etc/modules-load.d/k8s.conf
 overlay
 br_netfilter
+EOF
+
+ipAddr=$(ip a | grep enp0s8 -A2 | grep 'inet 192.168' | awk '{print $2;}' | cut -d/ -f 1)
+
+cat << EOF | sudo tee /etc/default/kubelet
+KUBELET_EXTRA_ARGS='--node-ip $ipAddr'
 EOF
 
 #disable swaping
 #sed 's/#   /swap.*/#swap.img/' /etc/fstab
 #sudo swapoff -a
-
+systemctl disable ufw
+systemctl stop ufw
 service systemd-resolved restart
